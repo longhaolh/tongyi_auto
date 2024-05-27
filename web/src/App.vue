@@ -18,8 +18,9 @@ const fileType = ref([
 const width = ref(0)
 const height = ref(0)
 const tasking = ref(false)
-  const taskSetting = ref({ watch: false, fileType: 'md', login: false, taskName: '' })
+const taskSetting = ref({ watch: false, fileType: 'md', login: false, taskName: '' })
 const uiSetting = ref({ theme: 'dark', showLog: true, notice: true })
+const startTime = ref('')
 onMounted(() => {
   // 获取视口宽度
   width.value =
@@ -32,7 +33,27 @@ onMounted(() => {
     document.documentElement.clientHeight ||
     document.body.clientHeight;
   initWebSocket();
+  if (!("Notification" in window)) {
+    if (uiSetting.value.notice) {
+      alert("此浏览器不支持桌面通知");
+    }
+  } else if (Notification.permission === "granted") {
+    // 用户已经授权
+    var notification = new Notification("你有新的通知！");
+  } else {
+    console.log('无通知权限', Notification.permission)
+    if (uiSetting.value.notice) {
+      alert('通知权限已被禁用，请在浏览器设置中将本站通知权限开启后再尝试')
+    }
+  }
+
 })
+// 发送通知
+const sentNotice = (msg) => {
+  if (!msg || !uiSetting.value.notice) return;
+  const notification = new Notification(msg);
+}
+
 // WS服务
 const initWebSocket = () => {
   const ws = new WebSocket("ws://localhost:3001");
@@ -48,6 +69,8 @@ const initWebSocket = () => {
         begin();
       } else {
         //任务完成
+        QuestionsIndex.value = 0;
+        sentNotice(`${taskSetting.value.taskName} 任务已完成，总耗时${new Date().getSeconds() - startTime.value}秒，请在output文件夹中查看`)
         tasking.value = false;
       }
     } else {
@@ -92,6 +115,13 @@ const begin = () => {
     })
     return
   };
+  if (taskSetting.value.taskName === '') {
+    ElMessage({
+      message: '请输入任务标题再开始',
+      type: 'warning',
+    })
+    return
+  };
   tasking.value = true;
   const data = {
     width: width.value,
@@ -100,9 +130,9 @@ const begin = () => {
     QuestionsIndex: QuestionsIndex.value,
     config: taskSetting.value,
   };
-  console.log(wsObj.value)
   //发送数据
   wsObj.value.send(JSON.stringify(data));
+  startTime.value = new Date().getSeconds();
 }
 </script>
 
@@ -115,6 +145,7 @@ const begin = () => {
         <el-input autofocus aria-label="任务标题:" v-model="taskSetting.taskName" style="width: 240px"
           placeholder="请输入本次任务标题,回答会存储在这个名称的文件下" maxlength="20" minlength="1" />
       </div>
+      <el-switch v-model="uiSetting.notice" size="default" active-text="任务完成桌面通知（推荐打开）" inactive-text="" />
       <el-switch v-model="taskSetting.watch" size="default" active-text="观察提问过程(不推荐开启,会频繁打开浏览器且窗口必须聚焦时通义千问才会响应)"
         inactive-text="" />
       <el-switch v-model="taskSetting.login" size="default" active-text="登录通义千问查询(不推荐,需要登录自己的账号,且需要强制开启观察模式)"

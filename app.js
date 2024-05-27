@@ -152,7 +152,7 @@ async function mainThread() {
                             if (e.contentType === "text" && e.role === 'assistant') {
                                 if (dataJSON.config.fileType === 'md') {
                                     const filePath = path.join('output', `${dataJSON.config.taskName}.md`);
-                                    const dataToWrite = `## ${dataJSON.Questions[dataJSON.QuestionsIndex]}\n ${e.content}\n\n\n`;
+                                    const dataToWrite = `## ${dataJSON.Questions[dataJSON.QuestionsIndex]}\n ${e.content.replaceAll('###', "")}\n\n\n`;
                                     // 将响应数据写入文件
                                     fs.appendFile(filePath, dataToWrite, 'utf8', function (err) {
                                         if (err) {
