@@ -12,7 +12,7 @@ const fileType = ref([
   },
   {
     value: 'txt',
-    label: 'Text'
+    label: 'TXT'
   }
 ])
 const width = ref(0)
@@ -38,8 +38,7 @@ onMounted(() => {
       alert("此浏览器不支持桌面通知");
     }
   } else if (Notification.permission === "granted") {
-    // 用户已经授权
-    var notification = new Notification("你有新的通知！");
+    console.log('有通知权限')
   } else {
     console.log('无通知权限', Notification.permission)
     if (uiSetting.value.notice) {
@@ -49,7 +48,7 @@ onMounted(() => {
 
 })
 // 发送通知
-const sentNotice = (msg) => {
+const sendNotice = (msg) => {
   if (!msg || !uiSetting.value.notice) return;
   const notification = new Notification(msg);
 }
@@ -61,18 +60,18 @@ const initWebSocket = () => {
   //接受数据
   ws.onmessage = function (msg) {
     let res = JSON.parse(msg.data);
-    if (res.status) {
+    if (res.status === 'continue') {
       Log.value.push(res);
       QuestionsIndex.value++;
       if (QuestionsIndex.value < Questions.value.length) {
         // 请求下一个问题
         begin();
-      } else {
-        //任务完成
-        QuestionsIndex.value = 0;
-        sentNotice(`${taskSetting.value.taskName} 任务已完成，总耗时${new Date().getSeconds() - startTime.value}秒，请在output文件夹中查看`)
-        tasking.value = false;
       }
+    } else if (res.status === 'finish') {
+      //任务完成
+      QuestionsIndex.value = 0;
+      sendNotice(`${taskSetting.value.taskName} 任务已完成，总耗时${new Date().getSeconds() - startTime.value}秒，请在output文件夹中查看`)
+      tasking.value = false;
     } else {
       // 显示日志时间 格式 hh:mm:ss:ms
       const date = new Date();
@@ -142,14 +141,14 @@ const begin = () => {
     <div class="config-area">
       <div>
         任务标题:
-        <el-input autofocus aria-label="任务标题:" v-model="taskSetting.taskName" style="width: 240px"
-          placeholder="请输入本次任务标题,回答会存储在这个名称的文件下" maxlength="20" minlength="1" />
+        <el-input autofocus aria-label="任务标题:" v-model="taskSetting.taskName" style="width: 44vw"
+          placeholder="请输入本次任务标题,回答会存储在这个名称的文件下" minlength="1" />
       </div>
       <el-switch v-model="uiSetting.notice" size="default" active-text="任务完成桌面通知（推荐打开）" inactive-text="" />
       <el-switch v-model="taskSetting.watch" size="default" active-text="观察提问过程(不推荐开启,会频繁打开浏览器且窗口必须聚焦时通义千问才会响应)"
         inactive-text="" />
-      <el-switch v-model="taskSetting.login" size="default" active-text="登录通义千问查询(不推荐,需要登录自己的账号,且需要强制开启观察模式)"
-        inactive-text="" />
+      <!-- <el-switch v-model="taskSetting.login" size="default" active-text="登录通义千问查询(不推荐,需要登录自己的账号,且需要强制开启观察模式)"
+        inactive-text="" /> -->
       <div>
         选择输出文件类型:
         <el-select v-model="taskSetting.fileType" placeholder="选择输出文件类型" size="large" style="width: 240px">

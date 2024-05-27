@@ -152,26 +152,25 @@ async function mainThread() {
                             if (e.contentType === "text" && e.role === 'assistant') {
                                 if (dataJSON.config.fileType === 'md') {
                                     const filePath = path.join('output', `${dataJSON.config.taskName}.md`);
-                                    const dataToWrite = `## ${dataJSON.Questions[dataJSON.QuestionsIndex]}\n ${e.content.replaceAll('###', "")}\n\n\n`;
+                                    const dataToWrite = `## ${dataJSON.Questions[dataJSON.QuestionsIndex]}\n ${e.content.replaceAll('###', "")}\n`;
                                     // 将响应数据写入文件
                                     fs.appendFile(filePath, dataToWrite, 'utf8', function (err) {
                                         if (err) {
                                             wsObj.send(stringify({ msg: "输出文件创建失败,可以重启项目再尝试..." + err, type: "error" }));
                                         } else {
                                             wsObj.send(stringify({ msg: `已成功写入数据到 ${filePath}`, type: "log" }));
-                                            // 检查任务队列是否还有未完成的
                                             dataJSON.QuestionsIndex++; // 任务完成,索引+1
                                             browser.close();
                                             // 重置浏览器和页面
                                             browser = null;
                                             page = null;
                                             if (dataJSON.QuestionsIndex >= dataJSON.Questions.length) {
-                                                // 所有任务已完成则关闭浏览器
+                                                wsObj.send(stringify({ msg: "任务圆满完成", type: "log", status: 'finish' }));
+                                                // 所有任务已完成，清除数据
                                                 dataJSON = null
-                                                wsObj.send(stringify({ msg: "任务已完成", type: "log", status: 'over' }));
                                             } else {
                                                 // 任务未完成则继续执行
-                                                wsObj.send(stringify({ msg: "开始下一个任务...", type: "log", status: 'over' }));
+                                                wsObj.send(stringify({ msg: "开始下一个任务...", type: "log", status: 'continue' }));
                                                 prepareBrowserAndPage();
                                             }
                                         }
@@ -194,7 +193,7 @@ async function mainThread() {
                                             // 重置浏览器和页面
                                             browser = null;
                                             page = null;
-                                            wsObj.send(stringify({ msg: "任务已完成", type: "log", status: 'over' }));
+                                            wsObj.send(stringify({ msg: "任务已完成", type: "log", status: 'finish' }));
                                         }
                                     });
                                 }
@@ -214,14 +213,6 @@ async function run() {
             type: "error"
         }));
         return;
-    }
-    if (dataJSON.QuestionsIndex > dataJSON.Questions.length) {
-        console.log('dataJSON', stringify(dataJSON))
-        wsObj.send(stringify({ msg: "任务结束,请查看output文件夹", type: "log", status: 'over' }));
-        browser.close();
-        browser = null;
-        page = null;
-        return
     }
     if (!dataJSON.config.login) {
         mainThread()

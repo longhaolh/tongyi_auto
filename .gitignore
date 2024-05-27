@@ -27,6 +27,7 @@ Thumbs.db
 # IDE设置
 /.idea
 /.vscode
+/web/.vscode
 *.sublime-workspace
 
 # 项目本地配置文件
