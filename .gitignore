@@ -1,0 +1,109 @@
+# 编译产生的文件
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# 包依赖目录
+node_modules/
+jspm_packages/
+
+# 日志文件
+*.log
+*.sql
+*.sqlite
+
+# 操作系统产生的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE设置
+/.idea
+/.vscode
+*.sublime-workspace
+
+# 项目本地配置文件
+/config.json
+
+# 如果您是使用Python开发，则通常需要忽略以下目录和文件
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+output/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+# 通常PyInstaller创建的临时文件和文件夹应该被忽略
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
+
+# Spacemacs tags file
+.tags
+# End of https://www.toptal.com/developers/gitignore/api/python
